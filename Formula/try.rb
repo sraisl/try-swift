@@ -2,7 +2,7 @@ class Try < Formula
   desc "Fresh directories for every experiment - native Swift rewrite of tobi/try"
   homepage "https://github.com/sraisl/try-swift"
   url "https://github.com/sraisl/try-swift/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "PLACEHOLDER"
+  sha256 "f765ff7f74065b6b3b45411b39016fa9258291fb1e5e05ae4e3ecc4c628798dc"
   license "MIT"
 
   head "https://github.com/sraisl/try-swift.git", branch: "main"
