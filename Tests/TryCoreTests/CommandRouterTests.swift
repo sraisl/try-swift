@@ -25,13 +25,15 @@ import Testing
 
     @Test func extractOptionReturnsNilWhenAbsent() {
         var args = RawArguments(["clone", "url"])
-        #expect(args.extractOption("--path") == nil)
+        let value = args.extractOption("--path")
+        #expect(value == nil)
         #expect(args.tokens == ["clone", "url"])
     }
 
     @Test func extractFlagRemovesFirstOccurrence() {
         var args = RawArguments(["--and-exit", "clone", "--and-exit"])
-        #expect(args.extractFlag("--and-exit"))
+        let removed = args.extractFlag("--and-exit")
+        #expect(removed)
         #expect(args.tokens == ["clone", "--and-exit"])
     }
 }
