@@ -64,15 +64,15 @@ try install                          # install the wrapper into your shell rc fi
 
 ### Keyboard (interactive picker)
 
-| Key | Action |
-|---|---|
-| `↑`/`↓`, `Ctrl-P`/`Ctrl-N` | Navigate |
-| Enter | Select / create new |
-| Ctrl-R | Rename |
-| Ctrl-G | Graduate (promote try to a real project) |
-| Ctrl-D | Mark for deletion (batch) |
-| Ctrl-T | Create new try immediately |
-| Esc | Cancel |
+| Key                        | Action                                   |
+| -------------------------- | ---------------------------------------- |
+| `↑`/`↓`, `Ctrl-P`/`Ctrl-N` | Navigate                                 |
+| Enter                      | Select / create new                      |
+| Ctrl-R                     | Rename                                   |
+| Ctrl-G                     | Graduate (promote try to a real project) |
+| Ctrl-D                     | Mark for deletion (batch)                |
+| Ctrl-T                     | Create new try immediately               |
+| Esc                        | Cancel                                   |
 
 ### Environment
 
