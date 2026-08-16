@@ -1,0 +1,56 @@
+name: Release
+"on":
+  push:
+    tags:
+      - v*
+jobs:
+  release:
+    runs-on: macos-26
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+      - name: Build (release)
+        run: swift build -c release
+      - name: Run acceptance tests
+        run: bash AcceptanceTests/runner.sh .build/release/try
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        with:
+          generate_release_notes: true
+      - name: Compute release tarball SHA256
+        id: sha
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          url="https://github.com/${GITHUB_REPOSITORY}/archive/refs/tags/${TAG}.tar.gz"
+          curl -sL "$url" -o release.tar.gz
+          sha256=$(shasum -a 256 release.tar.gz | cut -d' ' -f1)
+          echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
+      - name: Update Homebrew formula
+        env:
+          TAG: ${{ github.ref_name }}
+          SHA256: ${{ steps.sha.outputs.sha256 }}
+        run: |
+          url="https://github.com/${GITHUB_REPOSITORY}/archive/refs/tags/${TAG}.tar.gz"
+          sed -i '' \
+            -e "s|url \".*archive/refs/tags/.*\.tar\.gz\"|url \"${url}\"|" \
+            -e "s|sha256 \".*\"|sha256 \"${SHA256}\"|" \
+            Formula/try.rb
+      - name: Commit updated formula back to main
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout main
+          git pull origin main
+          if ! git diff --quiet -- Formula/try.rb; then
+            git add Formula/try.rb
+            git commit -m "Update Homebrew formula for ${TAG}"
+            git push origin main
+          fi
