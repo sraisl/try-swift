@@ -8,6 +8,10 @@ let arguments = Array(CommandLine.arguments.dropFirst())
 
 let (options, command) = CommandRouter.route(argv: arguments, env: environment)
 
+if options.disableColors {
+    TuiColors.disable()
+}
+
 func printToStdErr(_ text: String) {
     FileHandle.standardError.write(text.data(using: .utf8)!)
 }
@@ -204,9 +208,42 @@ func runDefaultCd(remainingArgs: [String], triesPath: String, options: GlobalOpt
         }
     }
 
-    // Interactive picker not wired up yet (lands in Phase 5).
-    printToStdErr("try: interactive picker not yet implemented in this build.\n")
-    exit(1)
+    let testKeys = TestKeyParser.parse(options.andKeysRaw)
+    let tui = TryTUI(
+        searchTerm: searchTerm,
+        basePath: triesPath,
+        initialInput: options.andType,
+        testRenderOnce: options.andExit,
+        testNoCls: options.andExit || !(testKeys?.isEmpty ?? true),
+        testKeys: testKeys,
+        testConfirm: options.andConfirm,
+        env: environment
+    )
+
+    guard let action = tui.run() else {
+        print("Cancelled.")
+        exit(1)
+    }
+
+    switch action {
+    case .delete(let paths, let base):
+        emitAndExit(ScriptRecipes.delete(paths: paths, basePath: base, currentDirectory: FileManager.default.currentDirectoryPath))
+    case .mkdir(let path):
+        emitAndExit(ScriptRecipes.mkdirCd(path: path, env: environment))
+    case .rename(let base, let old, let new):
+        emitAndExit(ScriptRecipes.rename(basePath: base, oldName: old, newName: new, env: environment))
+    case .ascend(let source, let dest, let basename, let base):
+        let gitFile = (source as NSString).appendingPathComponent(".git")
+        var isDir: ObjCBool = false
+        let exists = FileManager.default.fileExists(atPath: gitFile, isDirectory: &isDir)
+        let isWorktree = exists && !isDir.boolValue
+        emitAndExit(ScriptRecipes.graduate(source: source, dest: dest, basename: basename, basePath: base, isWorktree: isWorktree, env: environment))
+    case .cancel:
+        print("Cancelled.")
+        exit(1)
+    case .cd(let path):
+        emitAndExit(ScriptRecipes.cd(path: path, env: environment))
+    }
 }
 
 switch command {
