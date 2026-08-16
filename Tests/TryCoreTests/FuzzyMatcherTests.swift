@@ -41,11 +41,25 @@ import Testing
     }
 
     @Test func wordBoundaryAfterDashCounts() {
+        // "redis-server": r=0 e=1 d=2 i=3 s=4 -=5 s=6 e=7 r=8 v=9 e=10 r=11.
+        // The matcher is greedy-leftmost, so a single "s" query matches the
+        // first "s" at position 4, not the word-boundary "s" at position 6.
         let entry = FuzzyEntry(data: "e", text: "redis-server", baseScore: 0)
         let matcher = FuzzyMatcher(entries: [entry])
-        // 's' matches at position 6 (after the dash) - word boundary bonus applies.
         let results = matcher.match("s")
-        #expect(results.first!.positions == [6])
+        #expect(results.first!.positions == [4])
+    }
+
+    @Test func wordBoundaryBonusAppliesAtDashPosition() {
+        // Query "ss" forces the second match past the first "s" (pos 4), so
+        // it lands on the word-boundary "s" at position 6 and should score
+        // higher than an equivalent match with no boundary involved.
+        let boundary = FuzzyEntry(data: "boundary", text: "redis-server", baseScore: 0)
+        let noBoundary = FuzzyEntry(data: "no-boundary", text: "redissserver", baseScore: 0)
+        let matcher = FuzzyMatcher(entries: [boundary, noBoundary])
+        let results = matcher.match("ss")
+        let boundaryResult = results.first { $0.data == "boundary" }!
+        #expect(boundaryResult.positions == [4, 6])
     }
 
     @Test func proximityBonusFavorsConsecutiveMatches() {

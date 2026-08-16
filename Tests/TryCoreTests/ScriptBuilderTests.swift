@@ -83,8 +83,12 @@ import Testing
     @Test func worktreeWithoutRepoUsesBareGitRevParse() {
         let cmds = ScriptRecipes.worktree(path: "/tries/x", repo: nil, currentDirectory: "/cwd", env: env)
         let script = cmds[2]
+        // The initial rev-parse check has no -C (runs against the shell's own
+        // cwd); the later worktree add still uses -C "$repo" once resolved,
+        // matching upstream's script_worktree(path, repo = nil) exactly.
         #expect(script.contains("if git rev-parse --is-inside-work-tree"))
-        #expect(!script.contains("-C"))
+        #expect(!script.contains("git -C '/repos"))
+        #expect(script.contains("git -C \"$repo\" worktree add --detach"))
     }
 
     @Test func deleteEmitsTestDirAndRmRfPerEntry() {

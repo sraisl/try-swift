@@ -30,8 +30,11 @@ import Testing
     }
 
     @Test func truncateFromStartKeepsTail() {
+        // Matches upstream's truncate_from_start: it keeps the trailing
+        // portion but does NOT prepend an overflow marker (unlike truncate,
+        // which truncates from the end and does add one).
         let result = Metrics.truncateFromStart("/very/long/path/to/file.txt", maxWidth: 15)
-        #expect(result.hasPrefix("\u{2026}"))
         #expect(result.hasSuffix("file.txt"))
+        #expect(Metrics.visibleWidth(result) <= 15)
     }
 }
