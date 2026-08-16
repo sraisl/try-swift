@@ -1,3 +1,11 @@
 extends: default
 rules:
   document-start: disable
+  # SHA-pinned GitHub Actions (`uses: owner/repo@<40-char-sha>  # vX.Y.Z`)
+  # routinely exceed 80 chars; that's expected, not a style problem.
+  line-length:
+    max: 120
+  # yamlfmt normalizes to a single space before inline comments; defer to it
+  # rather than fighting over 1-vs-2 spaces on every SHA-pin comment.
+  comments:
+    min-spaces-from-content: 1
