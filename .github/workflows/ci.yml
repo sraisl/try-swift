@@ -1,9 +1,13 @@
 name: CI
 "on":
   push:
-    branches: [main]
+    branches:
+      - main
+      - fix/**
+      - feature/**
   pull_request:
-    branches: [main]
+    branches:
+      - main
 jobs:
   build-and-test:
     runs-on: macos-26
