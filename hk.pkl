@@ -10,7 +10,7 @@ local linters = new Mapping<String, Step> {
     ["actionlint"] = Builtins.actionlint
     ["yamllint"] = Builtins.yamllint
     ["yamlfmt"] = Builtins.yamlfmt
-    ["actionlint"] = Builtins.actionlint
+    ["zizmor"] = Builtins.zizmor
 
     // Or define custom steps:
     // ["custom"] {

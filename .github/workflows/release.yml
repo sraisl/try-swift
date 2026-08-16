@@ -12,6 +12,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          # kept true (unlike ci.yml): the final step pushes the formula
+          # update back to main and needs the persisted credential to do so.
+          persist-credentials: true
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
       - name: Build (release)
@@ -19,9 +22,10 @@ jobs:
       - name: Run acceptance tests
         run: bash AcceptanceTests/runner.sh .build/release/try
       - name: Create GitHub release
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
-        with:
-          generate_release_notes: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" --generate-notes
       - name: Compute release tarball SHA256
         id: sha
         env:
